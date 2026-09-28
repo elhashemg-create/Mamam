@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>مريومتي</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --wine:#4A1942;
+    --wine-deep:#230C20;
+    --blush:#E8B4BC;
+    --gold:#C9A44C;
+    --cream:#FDF6F0;
+    box-sizing:border-box;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-padding-top:env(safe-area-inset-top,0px);}
+  body{
+    font-family:'Tajawal', sans-serif;
+    background:radial-gradient(ellipse at top, var(--wine) 0%, var(--wine-deep) 68%);
+    background-attachment:fixed;
+    color:var(--cream);
+    min-height:100dvh;
+    overflow-x:hidden;
+    position:relative;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+
+  /* floating hearts, subtle, behind everything */
+  .hearts{position:fixed; inset:0; z-index:0; pointer-events:none;}
+  .hearts span{
+    position:absolute;
+    bottom:-10%;
+    font-size:1.1rem;
+    color:var(--blush);
+    opacity:.3;
+    animation:rise linear infinite;
+  }
+  @keyframes rise{
+    from{transform:translateY(0) rotate(0deg); opacity:.3;}
+    to{transform:translateY(-115vh) rotate(20deg); opacity:0;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .hearts{display:none;}
+  }
+
+  /* ---- Gate: its own full-height centering wrapper, independent of letter ---- */
+  #gate-wrap{
+    min-height:100dvh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:2rem 1.25rem;
+    position:relative;
+    z-index:1;
+  }
+  #gate{
+    width:100%;
+    max-width:400px;
+    text-align:center;
+    animation:fadeIn 1s ease;
+  }
+  .lock-mark{
+    font-size:2.1rem;
+    color:var(--gold);
+    margin-bottom:.85rem;
+    display:block;
+  }
+  #gate h1{
+    font-family:'Amiri', serif;
+    font-weight:700;
+    font-size:2.1rem;
+    color:var(--cream);
+    margin-bottom:.5rem;
+  }
+  #gate p.sub{
+    font-size:.95rem;
+    color:var(--blush);
+    margin-bottom:1.9rem;
+    line-height:1.8;
+  }
+  #pw{
+    width:100%;
+    padding:.9rem 1rem;
+    border-radius:10px;
+    border:1.5px solid rgba(232,180,188,.35);
+    background:rgba(255,255,255,.06);
+    color:var(--cream);
+    font-family:'Tajawal',sans-serif;
+    font-size:1.05rem;
+    letter-spacing:.15em;
+    text-align:center;
+    outline:none;
+    transition:border-color .2s, background .2s;
+  }
+  #pw:focus{border-color:var(--gold); background:rgba(255,255,255,.09);}
+  #pw::placeholder{color:rgba(253,246,240,.4); letter-spacing:normal;}
+  #unlock-btn{
+    margin-top:1.1rem;
+    width:100%;
+    padding:.85rem;
+    border:none;
+    border-radius:10px;
+    background:var(--gold);
+    color:var(--wine-deep);
+    font-family:'Tajawal',sans-serif;
+    font-weight:500;
+    font-size:1rem;
+    cursor:pointer;
+    transition:transform .15s, filter .15s;
+  }
+  #unlock-btn:hover{filter:brightness(1.08);}
+  #unlock-btn:active{transform:scale(.97);}
+  #err{
+    margin-top:1rem;
+    color:#ff9fae;
+    font-size:.9rem;
+    min-height:1.3em;
+  }
+  .shake{animation:shake .4s;}
+  @keyframes shake{
+    20%,60%{transform:translateX(-8px);}
+    40%,80%{transform:translateX(8px);}
+  }
+  @keyframes fadeIn{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);}}
+
+  /* ---- Letter: normal document flow, no forced centering ---- */
+  #letter{
+    display:none;
+    width:100%;
+    max-width:600px;
+    margin:0 auto;
+    padding:3.5rem 1.5rem 5rem;
+    position:relative;
+    z-index:1;
+  }
+  #letter.show{display:block;}
+
+  .reveal{
+    opacity:0;
+    transform:translateY(16px);
+    animation:revealUp .8s ease forwards;
+  }
+  @keyframes revealUp{to{opacity:1; transform:translateY(0);}}
+  @media (prefers-reduced-motion: reduce){
+    .reveal{opacity:1; transform:none; animation:none;}
+  }
+
+  .eyebrow-heart{
+    text-align:center;
+    color:var(--gold);
+    font-size:1.4rem;
+    margin-bottom:1rem;
+  }
+  #letter h1{
+    font-family:'Amiri', serif;
+    font-weight:700;
+    font-size:2.5rem;
+    text-align:center;
+    color:var(--cream);
+    margin-bottom:.35rem;
+  }
+  #letter .date-line{
+    text-align:center;
+    color:var(--blush);
+    font-size:.95rem;
+    margin-bottom:2rem;
+  }
+
+  .counters{
+    display:flex;
+    gap:.9rem;
+    flex-wrap:wrap;
+    justify-content:center;
+    margin:0 auto 2.2rem;
+    max-width:520px;
+  }
+  .counter-card{
+    flex:1 1 210px;
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(201,164,76,.35);
+    border-radius:14px;
+    padding:1.1rem .9rem;
+    text-align:center;
+  }
+  .counter-card .label{
+    font-size:.82rem;
+    color:var(--blush);
+    margin-bottom:.6rem;
+  }
+  .counter-card .nums{
+    display:flex;
+    justify-content:center;
+    gap:.5rem;
+    direction:ltr;
+  }
+  .counter-card .unit{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    min-width:2.4rem;
+  }
+  .counter-card .unit .val{
+    font-family:'Amiri', serif;
+    font-weight:700;
+    font-size:1.35rem;
+    color:var(--gold);
+    line-height:1.1;
+  }
+  .counter-card .unit .u-label{
+    font-size:.62rem;
+    color:rgba(253,246,240,.6);
+    margin-top:.2rem;
+  }
+
+  #song-btn{
+    display:flex;
+    align-items:center;
+    gap:.5rem;
+    width:fit-content;
+    margin:0 auto 2.5rem;
+    padding:.65rem 1.5rem;
+    border-radius:999px;
+    border:1.5px solid var(--gold);
+    color:var(--gold);
+    text-decoration:none;
+    font-size:.9rem;
+    transition:background .2s, color .2s, transform .15s;
+  }
+  #song-btn:hover{background:var(--gold); color:var(--wine-deep); transform:scale(1.03);}
+  #song-btn .note{display:inline-block; animation:sway 1.6s ease-in-out infinite;}
+  @keyframes sway{0%,100%{transform:rotate(-8deg);} 50%{transform:rotate(8deg);}}
+
+  .body-text{
+    font-size:1.12rem;
+    line-height:2.05;
+    color:rgba(253,246,240,.92);
+    max-width:56ch;
+    margin:0 auto 1.5rem;
+    text-align:right;
+  }
+  .body-text.lede{
+    font-family:'Amiri', serif;
+    font-size:1.28rem;
+    line-height:2;
+  }
+  .divider{
+    width:60px;
+    height:2px;
+    background:var(--gold);
+    margin:2.4rem auto;
+    opacity:.55;
+  }
+  .signoff{
+    text-align:center;
+    font-family:'Amiri', serif;
+    font-size:1.6rem;
+    color:var(--gold);
+    margin-top:2rem;
+  }
+  .signoff small{
+    display:block;
+    font-family:'Tajawal', sans-serif;
+    font-size:.9rem;
+    color:var(--blush);
+    margin-top:.6rem;
+    font-weight:300;
+    letter-spacing:.02em;
+  }
+</style>
+</head>
+<body>
+
+<div class="hearts" id="hearts"></div>
+
+<div id="gate-wrap">
+  <div id="gate">
+    <span class="lock-mark">♥</span>
+    <h1>مريومتي</h1>
+    <p class="sub">في الموقع ده حاجة تخصك انتي بس<br>لازم تعرفي الباسورد عشان تفتحيه</p>
+    <input type="password" id="pw" placeholder="اكتبي الباسورد" inputmode="numeric" autocomplete="off">
+    <button id="unlock-btn" onclick="tryUnlock()">افتحي</button>
+    <div id="err"></div>
+  </div>
+</div>
+
+<div id="letter">
+  <div class="eyebrow-heart reveal" style="animation-delay:.05s">♥</div>
+  <h1 class="reveal" style="animation-delay:.15s">يا مريومتي</h1>
+  <div class="date-line reveal" style="animation-delay:.25s">نص سنة و انتي حبيبتي و مع بعض... وكل يوم فيها بحبك أكتر</div>
+
+  <div class="counters reveal" style="animation-delay:.32s">
+    <div class="counter-card">
+      <div class="label">من يوم ما بقينا حبايب</div>
+      <div class="nums" id="counter-love"></div>
+    </div>
+    <div class="counter-card">
+      <div class="label">من يوم ما عرفنا بعض</div>
+      <div class="nums" id="counter-met"></div>
+    </div>
+  </div>
+
+  <a id="song-btn" class="reveal" style="animation-delay:.42s" href="https://www.youtube.com/results?search_query=تامر+حسني+عقلي+مني+طار" target="_blank" rel="noopener">
+    <span class="note">♪</span> اول اغنية حبيتي اني اغنيهالد
+  </a>
+
+  <p class="body-text lede reveal" style="animation-delay:.52s">
+    من ستة شهور، دخلتي حياتي وقلبتيها كلها لطعم تاني. من ساعتها وأنا كل يوم بلاقي سبب جديد أحبك بيه أكتر من اللي قبله.. بصراحة مش من ٦ شهور بس هما اكتر شويتين .. حبيتك و حبيت كل لحظة انتي ف حياتي فيها.. حبيت حياتي و دنيتي علشانك ي دنيتي
+  </p>
+
+  <p class="body-text reveal" style="animation-delay:.62s">
+    مش بس إنك حبيبتي، انتي بقيتي أمان قلبي، وأول حد بفكر فيه لما بصحى، وآخر حد ببقى نفسي أكلمه قبل ما أنام. كل تفصيلة فيكي — ضحكتك، صوتك، حتى زعلك التحفة ده — بقتي جزء من يومي مش قادر أستغنى عنه. و بردو مش كده و بس .. انتي بنوتي الي بخاف عليها اكتر من نفسي.. روحي الي بعيدة عني بس قريبة لقلبي يا قلبي انتي👀
+  </p>
+
+  <p class="body-text reveal" style="animation-delay:.72s">
+    فيه لحظات باقولها لنفسي: إزاي حد عسل و كيوت كده يقدر ياخد بالي كله؟ إزاي مكالمة تليفون معاكي بتغيّر شكل يومي بالكامل (لو مقفلتيش ف وشي🙃😂) او حتي شات ؟ مش عارف أفسرها، بس عارف إني مبسوط إنك ف حياتي و اني مقدرش اعيش لحظة من غيرك ي طاقتي و سندي و حياتي و روحي و اوكسجيني و دنيتي كلها
+  </p>
+
+  <div class="divider reveal" style="animation-delay:.8s"></div>
+
+  <p class="body-text reveal" style="animation-delay:.87s">
+    عايزك تعرفي إن الست شهور دول ما كانوش بس شهور عدت، كانوا شهور اتبنى فيها كل حياتي و عرفت دنيتي و حبيت حياتي بيكي و بسببك .. و حسيت ان بقا عندي دنيا جديدة و حياة جديدة.. حسيت اني اتولدت من جديد
+  </p>
+
+  <p class="body-text reveal" style="animation-delay:.95s">
+    مفيش يوم فيهم عادي عادي. كل يوم احلي من القبله .. حتي الايام الي كنا بنتخانق كنت متأكد اننا هنتصالح و نرجع لبعض لاننا ملناش غير بعض و انا مليش غيرك ي كل حياتي و حبيبتي و عشقي و كل ما ليا ف الدنيا دي.. ربنا يخليكي ليا ي مراتي
+  </p>
+
+  <p class="body-text reveal" style="animation-delay:1.05s">
+    يا ريتك تفتكري كل مرة تفتحي فيها الصفحة دي تعرفي و تتأكدي اني بحبك و هفضل احبك بجنان و بعشقك و بعشقك تفاصيلك و مهما حصل او مهما كان مش هسيبك و هفضل احبك.كل يوم عن اليوم الي قبله و بعشقك كل لحظة قد البحر عن اللحظة الي قبلها
+  </p>
+
+  <div class="signoff reveal" style="animation-delay:1.15s">
+    وحشتيني و وحشاني اويييي  🤍
+    <small>حبيبك اللي هيفضل يحبك لاخر لحظة ف عمره</small>
+  </div>
+</div>
+
+<script>
+  const heartsWrap = document.getElementById('hearts');
+  for(let i=0;i<12;i++){
+    const s = document.createElement('span');
+    s.textContent = '♥';
+    s.style.left = Math.random()*100+'vw';
+    s.style.animationDuration = (10+Math.random()*10)+'s';
+    s.style.animationDelay = (Math.random()*10)+'s';
+    s.style.fontSize = (0.8+Math.random()*1.2)+'rem';
+    heartsWrap.appendChild(s);
+  }
+
+  // live love counters
+  function renderCounter(el, fromDate){
+    const units = [
+      {key:'d', label:'يوم'},
+      {key:'h', label:'ساعة'},
+      {key:'m', label:'دقيقة'},
+      {key:'s', label:'ثانية'}
+    ];
+    el.innerHTML = units.map(u =>
+      `<div class="unit"><span class="val" data-u="${u.key}">0</span><span class="u-label">${u.label}</span></div>`
+    ).join('');
+    function tick(){
+      const diff = Math.max(0, Date.now() - fromDate.getTime());
+      const s = Math.floor(diff/1000)%60;
+      const m = Math.floor(diff/60000)%60;
+      const h = Math.floor(diff/3600000)%24;
+      const d = Math.floor(diff/86400000);
+      el.querySelector('[data-u="d"]').textContent = d;
+      el.querySelector('[data-u="h"]').textContent = h;
+      el.querySelector('[data-u="m"]').textContent = m;
+      el.querySelector('[data-u="s"]').textContent = s;
+    }
+    tick();
+    setInterval(tick, 1000);
+  }
+  renderCounter(document.getElementById('counter-love'), new Date('2026-03-24T00:00:00'));
+  renderCounter(document.getElementById('counter-met'), new Date('2024-07-15T00:00:00'));
+
+  const PASSWORD = "240326";
+  const pwInput = document.getElementById('pw');
+  const errBox = document.getElementById('err');
+  const gateWrap = document.getElementById('gate-wrap');
+  const letter = document.getElementById('letter');
+
+  function tryUnlock(){
+    if(pwInput.value.trim() === PASSWORD){
+      gateWrap.style.display = 'none';
+      letter.classList.add('show');
+      window.scrollTo(0,0);
+    } else {
+      const messages = [
+        'انتي مش مريومتي 🙄',
+        'كده دودي هيزعل 😤',
+        'برضو مش هي.. جربي تاني يا حبيبتي 💭',
+        'لأ لأ، مريومتي عمرها ما بتغلط كده 😌'
+      ];
+      errBox.textContent = messages[Math.floor(Math.random()*messages.length)];
+      gateWrap.querySelector('#gate').classList.remove('shake');
+      void gateWrap.offsetWidth;
+      gateWrap.querySelector('#gate').classList.add('shake');
+      pwInput.value = '';
+    }
+  }
+  pwInput.addEventListener('keydown', function(e){
+    if(e.key === 'Enter') tryUnlock();
+  });
+</script>
+</body>
+</html>
